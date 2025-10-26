@@ -39,3 +39,4 @@
 /Users/lukasdrdla/RecipeApp/RecipeApi/obj/Debug/net9.0/RecipeApi.pdb
 /Users/lukasdrdla/RecipeApp/RecipeApi/obj/Debug/net9.0/RecipeApi.genruntimeconfig.cache
 /Users/lukasdrdla/RecipeApp/RecipeApi/obj/Debug/net9.0/ref/RecipeApi.dll
+/Users/lukasdrdla/RecipeApp/RecipeApi/obj/Debug/net9.0/RecipeApi.sourcelink.json
