@@ -1,20 +1,32 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService, Recipe } from '../../services/api.service';
 import { ToastService } from '../../services/toast.service';
+import { ThemeToggleComponent } from '../../components/theme-toggle/theme-toggle';
+import { ThemeService } from '../../services/theme.service';
+import { RecipeSkeletonComponent } from '../../components/recipe-skeleton/recipe-skeleton';
+import { StatisticsComponent } from '../../components/statistics/statistics';
+import { ExportService } from '../../services/export.service';
 
 @Component({
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ThemeToggleComponent, RecipeSkeletonComponent, StatisticsComponent],
   selector: 'app-home',
   template: `
   <div class="container">
     <header class="header">
-      <h1 class="title">🍳 Recipe Collection</h1>
-      <p class="subtitle">Discover and manage your favorite recipes</p>
+      <div class="header-top">
+        <div>
+          <h1 class="title">🍳 Recipe Collection</h1>
+          <p class="subtitle">Discover and manage your favorite recipes</p>
+        </div>
+        <app-theme-toggle></app-theme-toggle>
+      </div>
     </header>
+
+    <app-statistics [recipes]="recipes"></app-statistics>
 
     <div class="search-section">
       <div class="search-container">
@@ -32,18 +44,38 @@ import { ToastService } from '../../services/toast.service';
           </svg>
         </button>
       </div>
-      <button class="new-btn" (click)="onNew()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="12" y1="5" x2="12" y2="19"></line>
-          <line x1="5" y1="12" x2="19" y2="12"></line>
-        </svg>
-        New Recipe
-      </button>
+      <div class="action-buttons">
+        <button class="action-btn" (click)="onExport()" title="Export all recipes">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Export
+        </button>
+        <button class="action-btn" (click)="onImport()" title="Import recipes from file">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          Import
+        </button>
+        <button class="new-btn" (click)="onNew()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          New Recipe
+        </button>
+      </div>
     </div>
+    <input type="file" accept=".json" style="display: none;" #fileInput (change)="onFileSelected($event)" />
 
     <div class="loading-state" *ngIf="isLoading">
-      <div class="loading-spinner"></div>
-      <p>Searching recipes...</p>
+      <div class="recipes-grid skeleton-grid">
+        <app-recipe-skeleton *ngFor="let i of [1,2,3,4,5,6]"></app-recipe-skeleton>
+      </div>
     </div>
 
     <div class="recipes-grid" *ngIf="recipes && recipes.length > 0 && !isLoading">
@@ -112,8 +144,21 @@ import { ToastService } from '../../services/toast.service';
     }
 
     .header {
-      text-align: center;
       margin-bottom: 3rem;
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .header-top > div {
+      flex: 1;
+      text-align: center;
+      min-width: 250px;
     }
 
     .title {
@@ -138,6 +183,47 @@ import { ToastService } from '../../services/toast.service';
       margin-bottom: 2rem;
       align-items: center;
       flex-wrap: wrap;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: white;
+      color: #374151;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      font-size: 0.9375rem;
+    }
+
+    .action-btn:hover {
+      background: #f9fafb;
+      border-color: #d1d5db;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    :host-context(.dark) .action-btn {
+      background: #1f2937;
+      border-color: #374151;
+      color: #e5e7eb;
+    }
+
+    :host-context(.dark) .action-btn:hover {
+      background: #374151;
+      border-color: #4b5563;
     }
 
     .search-container {
@@ -212,6 +298,10 @@ import { ToastService } from '../../services/toast.service';
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
       gap: 1.5rem;
+    }
+
+    .skeleton-grid {
+      width: 100%;
     }
 
     .recipe-card {
@@ -474,10 +564,14 @@ export class HomeComponent implements OnInit {
   totalPages = 0;
   private searchTimeout: any;
 
+  @ViewChild('fileInput') fileInput!: any;
+
   constructor(
     private api: ApiService,
     private router: Router,
-    private toast: ToastService
+    private toast: ToastService,
+    private theme: ThemeService,
+    private exportService: ExportService
   ) {}
 
   async ngOnInit() {
@@ -552,5 +646,65 @@ export class HomeComponent implements OnInit {
 
   open(r: Recipe) {
     this.router.navigate(['/details', r.id]);
+  }
+
+  onExport() {
+    // Get all recipes (not just current page)
+    this.api.getRecipes(1, 1000).then(response => {
+      const allRecipes = Array.isArray(response) ? response : response.data;
+      this.exportService.exportRecipes(allRecipes);
+      this.toast.success(`Exported ${allRecipes.length} recipes!`);
+    }).catch(() => {
+      // Fallback: export current page
+      this.exportService.exportRecipes(this.recipes);
+      this.toast.success(`Exported ${this.recipes.length} recipes!`);
+    });
+  }
+
+  onImport() {
+    this.fileInput.nativeElement.click();
+  }
+
+  async onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    try {
+      const recipes = await this.exportService.importRecipes(file);
+      
+      // Import each recipe
+      let successCount = 0;
+      let errorCount = 0;
+      
+      for (const recipe of recipes) {
+        try {
+          await this.api.createRecipe({
+            title: recipe.title,
+            description: recipe.description,
+            ingredientIds: recipe.ingredientIds || [],
+            rating: recipe.rating,
+            imageUrl: recipe.imageUrl
+          });
+          successCount++;
+        } catch {
+          errorCount++;
+        }
+      }
+
+      if (successCount > 0) {
+        this.toast.success(`Imported ${successCount} recipes successfully!`);
+        await this.loadRecipes(this.currentPage);
+      }
+      
+      if (errorCount > 0) {
+        this.toast.warning(`${errorCount} recipes failed to import.`);
+      }
+      
+      // Reset file input
+      input.value = '';
+    } catch (error: any) {
+      this.toast.error(error.message || 'Failed to import recipes.');
+    }
   }
 }

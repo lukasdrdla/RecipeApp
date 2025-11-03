@@ -11,6 +11,59 @@ body {
   min-height: 100vh;
   color: #333;
   line-height: 1.6;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* Dark Mode Styles */
+.dark body {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  color: #e5e7eb;
+}
+
+.dark {
+  color: #e5e7eb;
+}
+
+.dark .card,
+.dark .recipe-card,
+.dark .recipe-form,
+.dark .ingredients-preview,
+.dark .pagination {
+  background: #1f2937;
+  border-color: #374151;
+  color: #e5e7eb;
+}
+
+.dark .form-input,
+.dark .form-textarea,
+.dark .search-input {
+  background: #374151;
+  border-color: #4b5563;
+  color: #e5e7eb;
+}
+
+.dark .form-input:focus,
+.dark .form-textarea:focus,
+.dark .search-input:focus {
+  border-color: #667eea;
+  background: #4b5563;
+}
+
+.dark .empty-state,
+.dark .loading-state {
+  color: #9ca3af;
+}
+
+.dark ::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
 }
 
 /* Smooth scrolling */
