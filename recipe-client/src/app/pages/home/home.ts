@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService, Recipe } from '../../services/api.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   standalone: true,
@@ -45,20 +46,56 @@ import { ApiService, Recipe } from '../../services/api.service';
       <p>Searching recipes...</p>
     </div>
 
-    <div class="recipes-grid" *ngIf="recipes.length > 0 && !isLoading">
+    <div class="recipes-grid" *ngIf="recipes && recipes.length > 0 && !isLoading">
       <div *ngFor="let r of recipes" (click)="open(r)" class="recipe-card">
-        <div class="recipe-header">
-          <h3 class="recipe-title">{{ r.title }}</h3>
-          <div class="ingredient-count">{{ r.ingredientIds?.length || 0 }} ingredients</div>
+        <div class="recipe-image" *ngIf="r.imageUrl">
+          <img [src]="r.imageUrl" [alt]="r.title" />
         </div>
-        <p class="recipe-description">{{ r.description || 'No description available' }}</p>
-        <div class="recipe-footer">
-          <span class="view-recipe">View Recipe →</span>
+        <div class="recipe-image-placeholder" *ngIf="!r.imageUrl">
+          <span>🍳</span>
+        </div>
+        <div class="recipe-content">
+          <div class="recipe-header">
+            <h3 class="recipe-title">{{ r.title }}</h3>
+            <div class="recipe-meta">
+              <div class="ingredient-count">{{ r.ingredientIds?.length || 0 }} ingredients</div>
+              <div class="recipe-rating" *ngIf="r.rating">
+                <span class="rating-stars">
+                  <span *ngFor="let i of [1,2,3,4,5]" [class.filled]="i <= (r.rating || 0)">★</span>
+                </span>
+                <span class="rating-value">({{ r.rating | number:'1.1-1' }})</span>
+              </div>
+            </div>
+          </div>
+          <p class="recipe-description">{{ r.description || 'No description available' }}</p>
+          <div class="recipe-footer">
+            <span class="view-recipe">View Recipe →</span>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="empty-state" *ngIf="recipes.length === 0 && !isLoading">
+    <div class="pagination" *ngIf="totalPages > 1 && !isLoading">
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === 1"
+        (click)="onPageChange(currentPage - 1)"
+      >
+        ← Previous
+      </button>
+      <div class="pagination-info">
+        Page {{ currentPage }} of {{ totalPages }} ({{ total }} recipes)
+      </div>
+      <button
+        class="pagination-btn"
+        [disabled]="currentPage === totalPages"
+        (click)="onPageChange(currentPage + 1)"
+      >
+        Next →
+      </button>
+    </div>
+
+    <div class="empty-state" *ngIf="(!recipes || recipes.length === 0) && !isLoading">
       <div class="empty-icon">🍽️</div>
       <h3>No recipes found</h3>
       <p>Start by creating your first recipe or try a different search term.</p>
@@ -180,13 +217,14 @@ import { ApiService, Recipe } from '../../services/api.service';
     .recipe-card {
       background: white;
       border-radius: 16px;
-      padding: 1.5rem;
+      overflow: hidden;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
       border: 1px solid #f3f4f6;
       cursor: pointer;
       transition: all 0.3s ease;
       position: relative;
-      overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
 
     .recipe-card::before {
@@ -197,6 +235,7 @@ import { ApiService, Recipe } from '../../services/api.service';
       right: 0;
       height: 4px;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      z-index: 1;
     }
 
     .recipe-card:hover {
@@ -204,10 +243,37 @@ import { ApiService, Recipe } from '../../services/api.service';
       box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
     }
 
-    .recipe-header {
+    .recipe-image {
+      width: 100%;
+      height: 200px;
+      overflow: hidden;
+      background: #f3f4f6;
+    }
+
+    .recipe-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .recipe-image-placeholder {
+      width: 100%;
+      height: 200px;
+      background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
       display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+    }
+
+    .recipe-content {
+      padding: 1.5rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .recipe-header {
       margin-bottom: 1rem;
     }
 
@@ -215,8 +281,14 @@ import { ApiService, Recipe } from '../../services/api.service';
       font-size: 1.25rem;
       font-weight: 600;
       color: #1f2937;
-      margin: 0;
-      flex: 1;
+      margin: 0 0 0.75rem 0;
+    }
+
+    .recipe-meta {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
     }
 
     .ingredient-count {
@@ -227,6 +299,29 @@ import { ApiService, Recipe } from '../../services/api.service';
       font-size: 0.875rem;
       font-weight: 500;
       white-space: nowrap;
+    }
+
+    .recipe-rating {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .rating-stars {
+      color: #e5e7eb;
+      font-size: 1rem;
+      display: inline-flex;
+      gap: 0.125rem;
+    }
+
+    .rating-stars .filled {
+      color: #fbbf24;
+    }
+
+    .rating-value {
+      font-size: 0.875rem;
+      color: #6b7280;
+      font-weight: 500;
     }
 
     .recipe-description {
@@ -305,6 +400,46 @@ import { ApiService, Recipe } from '../../services/api.service';
       color: #6b7280;
     }
 
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1.5rem;
+      margin: 3rem 0;
+      padding: 1.5rem;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      flex-wrap: wrap;
+    }
+
+    .pagination-btn {
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .pagination-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    .pagination-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .pagination-info {
+      color: #6b7280;
+      font-size: 0.9375rem;
+      font-weight: 500;
+    }
+
     @media (max-width: 768px) {
       .container {
         padding: 1rem;
@@ -333,28 +468,68 @@ export class HomeComponent implements OnInit {
   recipes: Recipe[] = [];
   q = '';
   isLoading = false;
+  currentPage = 1;
+  limit = 10;
+  total = 0;
+  totalPages = 0;
   private searchTimeout: any;
 
-  constructor(private api: ApiService, private router: Router) {}
+  constructor(
+    private api: ApiService,
+    private router: Router,
+    private toast: ToastService
+  ) {}
 
   async ngOnInit() {
-    this.recipes = await this.api.getRecipes();
+    await this.loadRecipes();
+  }
+
+  async loadRecipes(page: number = 1) {
+    this.isLoading = true;
+    this.currentPage = page;
+    try {
+      const response = this.q.trim()
+        ? await this.api.searchRecipes(this.q.trim(), page, this.limit)
+        : await this.api.getRecipes(page, this.limit);
+      
+      // Safety check for response
+      // Handle both paginated response (new) and direct array (old format)
+      if (Array.isArray(response)) {
+        // Old format: direct array
+        this.recipes = response;
+        this.total = response.length;
+        this.totalPages = 1;
+      } else if (response && response.data) {
+        // New format: paginated response
+        this.recipes = response.data;
+        this.total = response.total || 0;
+        this.totalPages = response.totalPages || 0;
+      } else {
+        this.recipes = [];
+        this.total = 0;
+        this.totalPages = 0;
+      }
+    } catch (error) {
+      console.error('Error loading recipes:', error);
+      this.toast.error('Failed to load recipes');
+      this.recipes = [];
+      this.total = 0;
+      this.totalPages = 0;
+    } finally {
+      this.isLoading = false;
+    }
   }
 
   onSearchInput() {
-    // Clear previous timeout
     if (this.searchTimeout) {
       clearTimeout(this.searchTimeout);
     }
-
-    // Set new timeout for debounced search
     this.searchTimeout = setTimeout(() => {
       this.performSearch();
-    }, 300); // 300ms delay
+    }, 300);
   }
 
   async onSearch() {
-    // Clear timeout and search immediately
     if (this.searchTimeout) {
       clearTimeout(this.searchTimeout);
     }
@@ -362,18 +537,13 @@ export class HomeComponent implements OnInit {
   }
 
   private async performSearch() {
-    this.isLoading = true;
-    try {
-      this.recipes = this.q.trim()
-        ? await this.api.searchRecipes(this.q.trim())
-        : await this.api.getRecipes();
-    } catch (error) {
-      console.error('Search error:', error);
-      // Fallback to all recipes on error
-      this.recipes = await this.api.getRecipes();
-    } finally {
-      this.isLoading = false;
-    }
+    this.currentPage = 1;
+    await this.loadRecipes(1);
+  }
+
+  async onPageChange(page: number) {
+    await this.loadRecipes(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   onNew() {

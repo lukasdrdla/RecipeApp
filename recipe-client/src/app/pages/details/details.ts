@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ApiService, Recipe, Ingredient } from '../../services/api.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   standalone: true,
@@ -42,6 +43,57 @@ import { ApiService, Recipe, Ingredient } from '../../services/api.service';
             placeholder="Describe your recipe..."
             rows="4"
           ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Recipe Image</label>
+          <div class="image-upload-container">
+            <div class="image-preview" *ngIf="model.imageUrl">
+              <img [src]="model.imageUrl" alt="Recipe image" />
+              <button type="button" class="remove-image-btn" (click)="removeImage()">×</button>
+            </div>
+            <div class="image-upload-placeholder" *ngIf="!model.imageUrl">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21,15 16,10 5,21"></polyline>
+              </svg>
+              <p>No image selected</p>
+            </div>
+            <label class="upload-btn">
+              <input type="file" accept="image/*" (change)="onImageSelect($event)" style="display: none;" />
+              {{ model.imageUrl ? 'Change Image' : 'Upload Image' }}
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Rating</label>
+          <div class="rating-container">
+            <div class="rating-display" *ngIf="model.rating">
+              <span class="rating-stars-display">
+                <span *ngFor="let i of [1,2,3,4,5]" [class.filled]="i <= (model.rating || 0)">★</span>
+              </span>
+              <span class="rating-value-display">({{ model.rating | number:'1.1-1' }})</span>
+            </div>
+            <div class="rating-input">
+              <span
+                *ngFor="let i of [1,2,3,4,5]"
+                class="rating-star"
+                [class.filled]="i <= (model.rating || 0)"
+                (click)="updateRating(i)"
+                [title]="'Rate ' + i + ' stars'"
+              >
+                ★
+              </span>
+              <button type="button" class="clear-rating-btn" *ngIf="model.rating" (click)="updateRating(0)">
+                Clear Rating
+              </button>
+            </div>
+            <div class="rating-placeholder" *ngIf="!model.rating">
+              Click stars to rate this recipe
+            </div>
+          </div>
         </div>
 
         <div class="form-group">
@@ -223,6 +275,171 @@ import { ApiService, Recipe, Ingredient } from '../../services/api.service';
     .form-textarea {
       resize: vertical;
       min-height: 100px;
+    }
+
+    .image-upload-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .image-preview {
+      position: relative;
+      width: 100%;
+      max-width: 400px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #f3f4f6;
+    }
+
+    .image-preview img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .remove-image-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      font-size: 1.25rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease;
+    }
+
+    .remove-image-btn:hover {
+      background: rgba(0, 0, 0, 0.9);
+    }
+
+    .image-upload-placeholder {
+      width: 100%;
+      height: 200px;
+      border: 2px dashed #d1d5db;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      color: #6b7280;
+      background: #f9fafb;
+    }
+
+    .image-upload-placeholder svg {
+      color: #9ca3af;
+    }
+
+    .image-upload-placeholder p {
+      margin: 0;
+      font-size: 0.875rem;
+    }
+
+    .upload-btn {
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-align: center;
+      display: inline-block;
+      width: fit-content;
+    }
+
+    .upload-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    .rating-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .rating-display {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem;
+      background: #f9fafb;
+      border-radius: 8px;
+    }
+
+    .rating-stars-display {
+      color: #e5e7eb;
+      font-size: 1.25rem;
+      display: inline-flex;
+      gap: 0.125rem;
+    }
+
+    .rating-stars-display .filled {
+      color: #fbbf24;
+    }
+
+    .rating-value-display {
+      font-size: 1rem;
+      color: #6b7280;
+      font-weight: 600;
+    }
+
+    .rating-input {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .rating-star {
+      font-size: 2rem;
+      color: #e5e7eb;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      line-height: 1;
+    }
+
+    .rating-star:hover {
+      transform: scale(1.2);
+      color: #fbbf24;
+    }
+
+    .rating-star.filled {
+      color: #fbbf24;
+    }
+
+    .clear-rating-btn {
+      padding: 0.5rem 1rem;
+      background: #f3f4f6;
+      color: #6b7280;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-left: 0.5rem;
+    }
+
+    .clear-rating-btn:hover {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .rating-placeholder {
+      color: #9ca3af;
+      font-size: 0.875rem;
+      font-style: italic;
     }
 
     .ingredients-container {
@@ -533,7 +750,8 @@ export class DetailsComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private api: ApiService
+    private api: ApiService,
+    private toast: ToastService
   ) {}
 
   async ngOnInit() {
@@ -568,35 +786,91 @@ export class DetailsComponent implements OnInit {
   }
 
   async save() {
-    console.log('Saving recipe with model:', this.model);
-    console.log('Model ingredientIds:', this.model.ingredientIds);
-    
     try {
       if (this.isNew) {
-        // For new recipes, don't send ID
         const createModel = {
           title: this.model.title,
           description: this.model.description,
-          ingredientIds: this.model.ingredientIds
+          ingredientIds: this.model.ingredientIds,
+          rating: this.model.rating,
+          imageUrl: this.model.imageUrl
         };
-        console.log('Creating recipe with:', createModel);
         await this.api.createRecipe(createModel);
+        this.toast.success('Recipe created successfully!');
       } else if (this.id) {
         await this.api.updateRecipe(this.id, this.model);
+        this.toast.success('Recipe updated successfully!');
       }
-      this.back(true);
+      setTimeout(() => this.back(true), 500);
     } catch (error) {
       console.error('Error saving recipe:', error);
-      alert('Error saving recipe. Check console for details.');
+      this.toast.error('Failed to save recipe. Please try again.');
     }
   }
 
   async remove() {
     if (!this.id) return;
-    if (confirm('Delete this recipe?')) {
-      await this.api.deleteRecipe(this.id);
-      this.back(true);
+    if (confirm('Are you sure you want to delete this recipe?')) {
+      try {
+        await this.api.deleteRecipe(this.id);
+        this.toast.success('Recipe deleted successfully!');
+        setTimeout(() => this.back(true), 500);
+      } catch (error) {
+        console.error('Error deleting recipe:', error);
+        this.toast.error('Failed to delete recipe. Please try again.');
+      }
     }
+  }
+
+  async updateRating(rating: number) {
+    this.model.rating = rating;
+    
+    // If editing existing recipe, update rating on server
+    if (!this.isNew && this.id) {
+      try {
+        await this.api.updateRating(this.id, rating);
+        this.toast.success(`Rating updated to ${rating} stars!`);
+      } catch (error) {
+        console.error('Error updating rating:', error);
+        this.toast.error('Failed to update rating. Please try again.');
+      }
+    } else if (this.isNew) {
+      // For new recipes, rating is saved with the recipe
+      this.toast.info(`Rating set to ${rating} stars!`);
+    }
+  }
+
+  onImageSelect(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      this.toast.error('Image size must be less than 5MB');
+      return;
+    }
+
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      this.toast.error('Please select a valid image file');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      this.model.imageUrl = e.target?.result as string;
+      this.toast.success('Image uploaded successfully!');
+    };
+    reader.onerror = () => {
+      this.toast.error('Failed to read image file');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  removeImage() {
+    this.model.imageUrl = undefined;
+    this.toast.info('Image removed');
   }
 
   back(refresh = false) {

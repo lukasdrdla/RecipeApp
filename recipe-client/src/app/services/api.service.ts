@@ -7,6 +7,16 @@ export interface Recipe {
   title: string;
   description?: string;
   ingredientIds: string[];
+  rating?: number;
+  imageUrl?: string;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 }
 
 export interface Ingredient {
@@ -22,11 +32,11 @@ export class ApiService {
   constructor(private http: HttpClient) {}
 
   // Recipes
-  getRecipes() {
-    return firstValueFrom(this.http.get<Recipe[]>(`${this.baseUrl}/recipes`));
+  getRecipes(page: number = 1, limit: number = 10) {
+    return firstValueFrom(this.http.get<PaginatedResponse<Recipe>>(`${this.baseUrl}/recipes`, { params: { page, limit } }));
   }
-  searchRecipes(q: string) {
-    return firstValueFrom(this.http.get<Recipe[]>(`${this.baseUrl}/recipes/search`, { params: { q } }));
+  searchRecipes(q: string, page: number = 1, limit: number = 10) {
+    return firstValueFrom(this.http.get<PaginatedResponse<Recipe>>(`${this.baseUrl}/recipes/search`, { params: { q, page, limit } }));
   }
   getRecipe(id: string) {
     return firstValueFrom(this.http.get<Recipe>(`${this.baseUrl}/recipes/${id}`));
@@ -39,6 +49,9 @@ export class ApiService {
   }
   deleteRecipe(id: string) {
     return firstValueFrom(this.http.delete(`${this.baseUrl}/recipes/${id}`));
+  }
+  updateRating(id: string, rating: number) {
+    return firstValueFrom(this.http.put<Recipe>(`${this.baseUrl}/recipes/${id}/rating`, rating));
   }
 
   // Ingredients

@@ -17,4 +17,10 @@ public class Recipe
     [BsonElement("ingredientIds")]
     [BsonRepresentation(BsonType.ObjectId)]
     public List<string> IngredientIds { get; set; } = new();
+
+    [BsonElement("rating")]
+    public double? Rating { get; set; }
+
+    [BsonElement("imageUrl")]
+    public string? ImageUrl { get; set; }
 }
