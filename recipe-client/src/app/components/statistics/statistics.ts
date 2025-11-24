@@ -9,7 +9,6 @@ import { Recipe } from '../../services/api.service';
   template: `
     <div class="statistics-container">
       <div class="stat-card">
-        <div class="stat-icon">📊</div>
         <div class="stat-content">
           <div class="stat-value">{{ totalRecipes }}</div>
           <div class="stat-label">Total Recipes</div>
@@ -17,7 +16,6 @@ import { Recipe } from '../../services/api.service';
       </div>
       
       <div class="stat-card">
-        <div class="stat-icon">⭐</div>
         <div class="stat-content">
           <div class="stat-value">{{ averageRating | number:'1.1-1' }}</div>
           <div class="stat-label">Average Rating</div>
@@ -25,7 +23,6 @@ import { Recipe } from '../../services/api.service';
       </div>
       
       <div class="stat-card">
-        <div class="stat-icon">🥘</div>
         <div class="stat-content">
           <div class="stat-value">{{ totalIngredients }}</div>
           <div class="stat-label">Total Ingredients</div>
@@ -33,7 +30,6 @@ import { Recipe } from '../../services/api.service';
       </div>
       
       <div class="stat-card">
-        <div class="stat-icon">🏆</div>
         <div class="stat-content">
           <div class="stat-value">{{ ratedRecipes }}</div>
           <div class="stat-label">Rated Recipes</div>

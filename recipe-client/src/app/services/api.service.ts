@@ -61,4 +61,15 @@ export class ApiService {
   getIngredients() {
     return firstValueFrom(this.http.get<Ingredient[]>(`${this.baseUrl}/ingredients`));
   }
+  createIngredient(ingredient: Partial<Ingredient>) {
+    return firstValueFrom(this.http.post<Ingredient>(`${this.baseUrl}/ingredients`, ingredient));
+  }
+
+  updateIngredient(id: string, ingredient: Partial<Ingredient>) {
+    return firstValueFrom(this.http.put<Ingredient>(`${this.baseUrl}/ingredients/${id}`, ingredient));
+  }
+
+  deleteIngredient(id: string) {
+    return firstValueFrom(this.http.delete(`${this.baseUrl}/ingredients/${id}`));
+  }
 }

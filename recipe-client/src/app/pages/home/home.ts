@@ -19,7 +19,7 @@ import { ExportService } from '../../services/export.service';
     <header class="header">
       <div class="header-top">
         <div>
-          <h1 class="title">🍳 Recipe Collection</h1>
+          <h1 class="title">Recipe Collection</h1>
           <p class="subtitle">Discover and manage your favorite recipes</p>
         </div>
         <app-theme-toggle></app-theme-toggle>
@@ -67,6 +67,14 @@ import { ExportService } from '../../services/export.service';
             <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
           New Recipe
+        </button>
+        <button class="action-btn" (click)="onIngredients()" title="Manage ingredients">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2v6"></path>
+            <path d="M5 11h14"></path>
+            <path d="M6 22h12"></path>
+          </svg>
+          Ingredients
         </button>
       </div>
     </div>
@@ -642,6 +650,10 @@ export class HomeComponent implements OnInit {
 
   onNew() {
     this.router.navigate(['/new']);
+  }
+
+  onIngredients() {
+    this.router.navigate(['/ingredients']);
   }
 
   open(r: Recipe) {

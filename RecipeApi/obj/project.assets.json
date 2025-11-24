@@ -1595,11 +1595,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/lukasdrdla/RecipeApp/RecipeApi/RecipeApi.csproj",
+      "projectUniqueName": "/Users/lukasdrdla/Projects/RecipeApp/RecipeApi/RecipeApi.csproj",
       "projectName": "RecipeApi",
-      "projectPath": "/Users/lukasdrdla/RecipeApp/RecipeApi/RecipeApi.csproj",
+      "projectPath": "/Users/lukasdrdla/Projects/RecipeApp/RecipeApi/RecipeApi.csproj",
       "packagesPath": "/Users/lukasdrdla/.nuget/packages/",
-      "outputPath": "/Users/lukasdrdla/RecipeApp/RecipeApi/obj/",
+      "outputPath": "/Users/lukasdrdla/Projects/RecipeApp/RecipeApi/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/lukasdrdla/.nuget/NuGet/NuGet.Config"

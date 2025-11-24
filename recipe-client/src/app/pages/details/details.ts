@@ -114,15 +114,24 @@ import { ToastService } from '../../services/toast.service';
               </div>
               
               <div class="dropdown" [class.open]="isDropdownOpen">
-                <div class="search-container">
-                  <input 
-                    type="text" 
-                    placeholder="Search ingredients..." 
-                    [(ngModel)]="ingredientSearch"
-                    (input)="filterIngredients()"
-                    name="ingredientSearch"
-                    class="search-input"
-                  />
+                <div class="dropdown-header">
+                  <div class="search-container">
+                    <input 
+                      type="text" 
+                      placeholder="Search ingredients..." 
+                      [(ngModel)]="ingredientSearch"
+                      (input)="filterIngredients()"
+                      name="ingredientSearch"
+                      class="search-input"
+                    />
+                  </div>
+                  <button type="button" (click)="openCreateIngredientModal()" class="create-ingredient-btn-top">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <line x1="12" y1="5" x2="12" y2="19"></line>
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    New Ingredient
+                  </button>
                 </div>
                 <div class="options">
                   <div 
@@ -174,6 +183,59 @@ import { ToastService } from '../../services/toast.service';
             <span class="ingredient-category">{{ ing.category }}</span>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Modal for creating new ingredient -->
+    <div class="modal-overlay" *ngIf="showIngredientModal" (click)="closeIngredientModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2 class="modal-title">✨ Create New Ingredient</h2>
+          <button type="button" class="modal-close" (click)="closeIngredientModal()">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        
+        <form (ngSubmit)="saveNewIngredient()" class="modal-form">
+          <div class="modal-body">
+            <div class="form-group">
+              <label class="form-label">Ingredient Name *</label>
+              <input 
+                class="form-input" 
+                [(ngModel)]="newIngredient.name" 
+                name="newIngredientName"
+                placeholder="e.g., Tomato, Garlic, Basil..."
+                required
+                autofocus
+              />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <input 
+                class="form-input" 
+                [(ngModel)]="newIngredient.category" 
+                name="newIngredientCategory"
+                placeholder="e.g., Vegetable, Spice, Dairy..."
+              />
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="modal-cancel-btn" (click)="closeIngredientModal()">
+              Cancel
+            </button>
+            <button type="submit" class="modal-save-btn" [disabled]="!newIngredient.name?.trim()">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20,6 9,17 4,12"></polyline>
+              </svg>
+              Create & Add
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -549,9 +611,17 @@ import { ToastService } from '../../services/toast.service';
       display: block;
     }
 
-    .search-container {
+    .dropdown-header {
       padding: 0.75rem;
-      border-bottom: 1px solid #e5e7eb;
+      border-bottom: 2px solid #e5e7eb;
+      background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .search-container {
+      flex: 1;
     }
 
     .search-input {
@@ -566,6 +636,28 @@ import { ToastService } from '../../services/toast.service';
 
     .search-input:focus {
       border-color: #667eea;
+    }
+
+    .create-ingredient-btn-top {
+      width: 100%;
+      padding: 0.625rem 1rem;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .create-ingredient-btn-top:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
     }
 
     .options {
@@ -618,6 +710,158 @@ import { ToastService } from '../../services/toast.service';
       text-align: center;
       color: #6b7280;
       font-style: italic;
+    }
+
+    /* Modal styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      width: 90%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow: hidden;
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.5rem;
+      border-bottom: 2px solid #f3f4f6;
+      background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
+    }
+
+    .modal-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1f2937;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: #6b7280;
+      cursor: pointer;
+      padding: 0.5rem;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-close:hover {
+      background: #f3f4f6;
+      color: #374151;
+    }
+
+    .modal-form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      overflow-y: auto;
+      max-height: calc(90vh - 200px);
+    }
+
+    .modal-footer {
+      display: flex;
+      gap: 1rem;
+      padding: 1.5rem;
+      border-top: 2px solid #f3f4f6;
+      background: linear-gradient(135deg, #f9fafb 0%, #ffffff 100%);
+    }
+
+    .modal-cancel-btn {
+      flex: 1;
+      padding: 0.75rem 1.5rem;
+      background: white;
+      color: #6b7280;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 1rem;
+    }
+
+    .modal-cancel-btn:hover {
+      background: #f9fafb;
+      border-color: #d1d5db;
+      color: #374151;
+    }
+
+    .modal-save-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 1rem;
+    }
+
+    .modal-save-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+    }
+
+    .modal-save-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
     .form-actions {
@@ -746,6 +990,10 @@ export class DetailsComponent implements OnInit {
   filteredIngredients: Ingredient[] = [];
   ingredientSearch = '';
   isDropdownOpen = false;
+
+  // Modal properties
+  showIngredientModal = false;
+  newIngredient: Partial<Ingredient> = { name: '', category: '' };
 
   constructor(
     private route: ActivatedRoute,
@@ -939,6 +1187,47 @@ export class DetailsComponent implements OnInit {
     const target = event.target as HTMLElement;
     if (!target.closest('.multi-select')) {
       this.isDropdownOpen = false;
+    }
+  }
+
+  openCreateIngredient() {
+    // Navigate to ingredients page where user can create a new ingredient
+    this.router.navigate(['/ingredients/new']);
+  }
+
+  openCreateIngredientModal() {
+    this.showIngredientModal = true;
+    this.newIngredient = { name: '', category: '' };
+    this.isDropdownOpen = false;
+  }
+
+  closeIngredientModal() {
+    this.showIngredientModal = false;
+    this.newIngredient = { name: '', category: '' };
+  }
+
+  async saveNewIngredient() {
+    if (!this.newIngredient.name?.trim()) {
+      this.toast.error('Ingredient name is required');
+      return;
+    }
+
+    try {
+      const created = await this.api.createIngredient(this.newIngredient);
+      this.toast.success(`Ingredient "${created.name}" created!`);
+      
+      // Add to all ingredients list
+      this.allIngredients.push(created);
+      this.filteredIngredients = [...this.allIngredients];
+      
+      // Automatically add to selected ingredients
+      this.addIngredient(created);
+      
+      // Close modal
+      this.closeIngredientModal();
+    } catch (error) {
+      console.error('Error creating ingredient:', error);
+      this.toast.error('Failed to create ingredient');
     }
   }
 }

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "vtz8hI/Oddg=",
+  "dgSpecHash": "CdaZ0WSJc3o=",
   "success": true,
-  "projectFilePath": "/Users/lukasdrdla/RecipeApp/RecipeApi/RecipeApi.csproj",
+  "projectFilePath": "/Users/lukasdrdla/Projects/RecipeApp/RecipeApi/RecipeApi.csproj",
   "expectedPackageFiles": [
     "/Users/lukasdrdla/.nuget/packages/dnsclient/1.6.1/dnsclient.1.6.1.nupkg.sha512",
     "/Users/lukasdrdla/.nuget/packages/microsoft.aspnetcore.cors/2.3.0/microsoft.aspnetcore.cors.2.3.0.nupkg.sha512",
